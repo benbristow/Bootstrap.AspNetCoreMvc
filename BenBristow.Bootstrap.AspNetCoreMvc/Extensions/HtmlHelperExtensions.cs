@@ -1,5 +1,7 @@
 using System.Linq.Expressions;
 using System.Text.Encodings.Web;
+using BenBristow.Bootstrap.AspNetCoreMvc.Enums;
+using BenBristow.Extensions;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
@@ -12,6 +14,36 @@ namespace BenBristow.Bootstrap.AspNetCoreMvc.Extensions;
 /// </summary>
 public static class HtmlHelperExtensions
 {
+    /// <summary>
+    /// Generates a Bootstrap-styled alert element with the specified message, variant, and dismissible option.
+    /// </summary>
+    /// <param name="htmlHelper">The <see cref="IHtmlHelper"/> instance this method extends.</param>
+    /// <param name="message">The message to display in the alert.</param>
+    /// <param name="variant">The Bootstrap variant of the alert. Defaults to Variant.Primary.</param>
+    /// <param name="dismissible">Specifies whether the alert is dismissible. Defaults to false.</param>
+    /// <returns>An <see cref="IHtmlContent"/> that represents the rendered alert element.</returns>
+    public static IHtmlContent BootstrapAlert(
+        this IHtmlHelper htmlHelper,
+        string message,
+        Variant variant = Variant.Primary,
+        bool dismissible = false)
+    {
+        var alertClass = $"alert alert-{variant.GetDescription()}";
+        if (dismissible)
+            alertClass += " alert-dismissible";
+    
+        var writer = new StringWriter();
+        writer.Write($"<div class=\"{alertClass}\" role=\"alert\">");
+        if (dismissible)
+        {
+            writer.Write("<button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button>");
+        }
+        writer.Write(message);
+        writer.Write("</div>");
+    
+        return new HtmlString(writer.ToString());
+    }
+
     /// <summary>
     /// Generates a Bootstrap-styled input element for the specified model expression.
     /// </summary>
