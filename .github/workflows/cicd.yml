@@ -1,0 +1,25 @@
+name: Build & Publish
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [published]
+
+jobs:
+  build_publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+      - name: Build project
+        run: dotnet build -c Release
+      - name: Pack and push to NuGet (on release)
+        if: github.event_name == 'release'
+        run: |
+          dotnet pack -c Release --no-build --output .
+          dotnet nuget push "*.nupkg" --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
