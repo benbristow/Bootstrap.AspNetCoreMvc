@@ -11,3 +11,11 @@ To install, run the following command in the Package Manager Console:
 ```
 Install-Package BenBristow.Bootstrap.AspNetCoreMvc
 ```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a pull request or open an issue for any bugs or feature requests.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
