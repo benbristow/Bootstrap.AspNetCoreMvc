@@ -58,6 +58,7 @@ public static class HtmlHelperExtensions
     /// <param name="variant">The Bootstrap variant of the button. Defaults to Variant.Primary.</param>
     /// <param name="type">The type of the button. Defaults to "button".</param>
     /// <param name="href">The URL the button links to. Optional.</param>
+    /// <param name="size">The Bootstrap size of the button. Defaults to Size.Default.</param>
     /// <param name="attributes">An object that contains the HTML attributes to set for the element. Optional.</param>
     /// <returns>An <see cref="IHtmlContent"/> that represents the rendered button element.</returns>
     public static IHtmlContent BootstrapButton(
@@ -66,10 +67,14 @@ public static class HtmlHelperExtensions
         Variant variant = Variant.Primary,
         string type = "button",
         string? href = null,
+        Size size = Size.Default,
         object? attributes = null)
     {
         var tag = string.IsNullOrEmpty(href) ? "button" : "a";
+
         var baseClass = $"btn btn-{variant.GetDescription()}";
+        if (size != Size.Default)
+            baseClass += $" btn-{size.GetDescription()}";
 
         var tagBuilder = new TagBuilder(tag);
         var mergedAttributes = new RouteValueDictionary(attributes)
@@ -101,6 +106,7 @@ public static class HtmlHelperExtensions
     /// <param name="expression">An expression that identifies the model property.</param>
     /// <param name="inputType">The type of the input element. Defaults to "text".</param>
     /// <param name="placeholder">The placeholder text for the input element. Optional.</param>
+    /// <param name="size">The Bootstrap size of the input element. Defaults to Size.Default.</param>
     /// <param name="attributes">An object that contains the HTML attributes to set for the element. Optional.</param>
     /// <returns>An <see cref="IHtmlContent"/> that represents the rendered input element.</returns>
     public static IHtmlContent BootstrapInputFor<TModel, TValue>(
@@ -108,19 +114,23 @@ public static class HtmlHelperExtensions
         Expression<Func<TModel, TValue>> expression,
         string inputType = "text",
         string placeholder = "",
+        Size size = Size.Default,
         object? attributes = null)
     {
         var modelExplorer = htmlHelper.ViewData.ModelExplorer.GetExplorerForProperty(htmlHelper.NameFor(expression));
         var isRequired = modelExplorer.Metadata.IsRequired;
 
         // Prepare attributes
+        var inputClass = "form-control";
+        if (size != Size.Default)
+            inputClass += $" form-control-{size.GetDescription()}";
+
         var defaultAttributes = new RouteValueDictionary(
             new
             {
                 placeholder,
-                @class = "form-control" + (isRequired ? " required" : "")
+                @class = inputClass
             });
-
 
         if (attributes != null)
         {
