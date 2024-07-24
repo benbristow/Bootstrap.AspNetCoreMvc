@@ -28,20 +28,68 @@ public static class HtmlHelperExtensions
         Variant variant = Variant.Primary,
         bool dismissible = false)
     {
-        var alertClass = $"alert alert-{variant.GetDescription()}";
-        if (dismissible)
-            alertClass += " alert-dismissible";
-    
-        var writer = new StringWriter();
-        writer.Write($"<div class=\"{alertClass}\" role=\"alert\">");
+        var tagBuilder = new TagBuilder("div");
+        tagBuilder.AddCssClass($"alert alert-{variant.GetDescription()}");
+        tagBuilder.Attributes["role"] = "alert";
+
         if (dismissible)
         {
-            writer.Write("<button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button>");
+            tagBuilder.AddCssClass("alert-dismissible");
+
+            var dismissButton = new TagBuilder("button");
+            dismissButton.AddCssClass("btn-close");
+            dismissButton.Attributes["type"] = "button";
+            dismissButton.Attributes["data-bs-dismiss"] = "alert";
+            dismissButton.Attributes["aria-label"] = "Close";
+
+            tagBuilder.InnerHtml.AppendHtml(dismissButton);
         }
-        writer.Write(message);
-        writer.Write("</div>");
-    
-        return new HtmlString(writer.ToString());
+
+        tagBuilder.InnerHtml.Append(message);
+
+        return tagBuilder;
+    }
+
+    /// <summary>
+    /// Generates a Bootstrap-styled button element with the specified text, variant, and attributes.
+    /// </summary>
+    /// <param name="htmlHelper">The <see cref="IHtmlHelper"/> instance this method extends.</param>
+    /// <param name="text">The text to display on the button.</param>
+    /// <param name="variant">The Bootstrap variant of the button. Defaults to Variant.Primary.</param>
+    /// <param name="type">The type of the button. Defaults to "button".</param>
+    /// <param name="href">The URL the button links to. Optional.</param>
+    /// <param name="attributes">An object that contains the HTML attributes to set for the element. Optional.</param>
+    /// <returns>An <see cref="IHtmlContent"/> that represents the rendered button element.</returns>
+    public static IHtmlContent BootstrapButton(
+        this IHtmlHelper htmlHelper,
+        string text,
+        Variant variant = Variant.Primary,
+        string type = "button",
+        string? href = null,
+        object? attributes = null)
+    {
+        var tag = string.IsNullOrEmpty(href) ? "button" : "a";
+        var baseClass = $"btn btn-{variant.GetDescription()}";
+
+        var tagBuilder = new TagBuilder(tag);
+        var mergedAttributes = new RouteValueDictionary(attributes)
+        {
+            ["class"] = baseClass
+        };
+
+        if (string.IsNullOrEmpty(href))
+        {
+            mergedAttributes["type"] = type;
+        }
+        else
+        {
+            mergedAttributes["href"] = href;
+        }
+
+        tagBuilder.MergeAttributes(mergedAttributes);
+        tagBuilder.InnerHtml.Append(text);
+
+        return tagBuilder;
     }
 
     /// <summary>
@@ -50,15 +98,11 @@ public static class HtmlHelperExtensions
     /// <typeparam name="TModel">The type of the model.</typeparam>
     /// <typeparam name="TValue">The type of the value.</typeparam>
     /// <param name="htmlHelper">The <see cref="IHtmlHelper{TModel}"/> instance this method extends.</param>
-    /// <param name="expression">An expression that identifies the property to display.</param>
-    /// <param name="inputType">The type of the input element (e.g., "text", "email"). Defaults to "text".</param>
-    /// <param name="placeholder">The placeholder text for the input element. Defaults to an empty string.</param>
+    /// <param name="expression">An expression that identifies the model property.</param>
+    /// <param name="inputType">The type of the input element. Defaults to "text".</param>
+    /// <param name="placeholder">The placeholder text for the input element. Optional.</param>
     /// <param name="attributes">An object that contains the HTML attributes to set for the element. Optional.</param>
     /// <returns>An <see cref="IHtmlContent"/> that represents the rendered input element.</returns>
-    /// <remarks>
-    /// This method generates an input element with Bootstrap styling applied. It supports custom HTML attributes,
-    /// which can be used to override the default attributes or add new ones.
-    /// </remarks>
     public static IHtmlContent BootstrapInputFor<TModel, TValue>(
         this IHtmlHelper<TModel> htmlHelper,
         Expression<Func<TModel, TValue>> expression,
@@ -66,29 +110,39 @@ public static class HtmlHelperExtensions
         string placeholder = "",
         object? attributes = null)
     {
-        var isRequired = htmlHelper.ViewData.ModelExplorer.GetExplorerForProperty(htmlHelper.NameFor(expression)).Metadata.IsRequired;
+        var modelExplorer = htmlHelper.ViewData.ModelExplorer.GetExplorerForProperty(htmlHelper.NameFor(expression));
+        var isRequired = modelExplorer.Metadata.IsRequired;
 
-        var defaultHtmlAttributes = new
+        // Prepare attributes
+        var defaultAttributes = new RouteValueDictionary(
+            new
+            {
+                placeholder,
+                @class = "form-control" + (isRequired ? " required" : "")
+            });
+
+
+        if (attributes != null)
         {
-            placeholder,
-            @class = "form-control" + (isRequired ? " required" : "")
-        };
+            var customAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(attributes);
+            foreach (var attr in customAttributes)
+                defaultAttributes[attr.Key] = attr.Value;
+        }
 
-        var defaultAttributesDict = HtmlHelper.AnonymousObjectToHtmlAttributes(defaultHtmlAttributes);
-        var customAttributesDict = HtmlHelper.AnonymousObjectToHtmlAttributes(attributes);
-
-        var finalAttributes = new RouteValueDictionary(defaultAttributesDict);
-        foreach (var attr in customAttributesDict)
-            finalAttributes[attr.Key] = attr.Value;
-
+        // Create input
         var input = inputType.Equals("textarea", StringComparison.OrdinalIgnoreCase)
-            ? htmlHelper.TextAreaFor(expression, finalAttributes)
-            : htmlHelper.TextBoxFor(expression, finalAttributes);
+            ? htmlHelper.TextAreaFor(expression, defaultAttributes)
+            : htmlHelper.TextBoxFor(expression, defaultAttributes);
 
+        // Create label and validation message
+        var label = htmlHelper.LabelFor(expression, new { @class = "form-label" });
+        var validationMessage = htmlHelper.ValidationMessageFor(expression, string.Empty, new { @class = "text-danger" });
+
+        // Combine elements
         var writer = new StringWriter();
-        htmlHelper.LabelFor(expression, new { @class = "form-label" }).WriteTo(writer, HtmlEncoder.Default);
+        label.WriteTo(writer, HtmlEncoder.Default);
         input.WriteTo(writer, HtmlEncoder.Default);
-        htmlHelper.ValidationMessageFor(expression, string.Empty, new { @class = "text-danger" }).WriteTo(writer, HtmlEncoder.Default);
+        validationMessage.WriteTo(writer, HtmlEncoder.Default);
 
         return new HtmlString(writer.ToString());
     }
