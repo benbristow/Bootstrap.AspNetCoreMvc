@@ -98,23 +98,25 @@ public static class HtmlHelperExtensions
     }
 
     /// <summary>
-    /// Generates a Bootstrap-styled input element for the specified model expression.
+    /// Creates a Bootstrap styled form input with label and validation message.
     /// </summary>
     /// <typeparam name="TModel">The type of the model.</typeparam>
     /// <typeparam name="TValue">The type of the value.</typeparam>
-    /// <param name="htmlHelper">The <see cref="IHtmlHelper{TModel}"/> instance this method extends.</param>
-    /// <param name="expression">An expression that identifies the model property.</param>
+    /// <param name="htmlHelper">The HTML helper instance.</param>
+    /// <param name="expression">An expression that identifies the object that contains the displayed or posted value.</param>
     /// <param name="inputType">The type of the input element. Defaults to "text".</param>
-    /// <param name="placeholder">The placeholder text for the input element. Optional.</param>
-    /// <param name="size">The Bootstrap size of the input element. Defaults to Size.Default.</param>
-    /// <param name="attributes">An object that contains the HTML attributes to set for the element. Optional.</param>
-    /// <returns>An <see cref="IHtmlContent"/> that represents the rendered input element.</returns>
+    /// <param name="placeholder">The placeholder text for the input.</param>
+    /// <param name="size">The size of the input. Defaults to Size.Default.</param>
+    /// <param name="marginBottom">The bottom margin for the input group. Nullable.</param>
+    /// <param name="attributes">Additional HTML attributes to apply to the input element.</param>
+    /// <returns>An IHtmlContent containing the input group.</returns>
     public static IHtmlContent BootstrapInputFor<TModel, TValue>(
         this IHtmlHelper<TModel> htmlHelper,
         Expression<Func<TModel, TValue>> expression,
         string inputType = "text",
         string placeholder = "",
         Size size = Size.Default,
+        Margin? marginBottom = null,
         object? attributes = null)
     {
         var modelExplorer = htmlHelper.ViewData.ModelExplorer.GetExplorerForProperty(htmlHelper.NameFor(expression));
@@ -132,6 +134,9 @@ public static class HtmlHelperExtensions
                 @class = inputClass
             });
 
+        if (isRequired)
+            defaultAttributes["required"] = "required";
+
         if (attributes != null)
         {
             var customAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(attributes);
@@ -146,14 +151,18 @@ public static class HtmlHelperExtensions
 
         // Create label and validation message
         var label = htmlHelper.LabelFor(expression, new { @class = "form-label" });
-        var validationMessage = htmlHelper.ValidationMessageFor(expression, string.Empty, new { @class = "text-danger" });
+        var validationMessage = htmlHelper.ValidationMessageFor(expression, string.Empty, new { @class = "invalid-feedback" });
+
+        // Create wrapper div using TagBuilder
+        var wrapper = new TagBuilder("div");
+        if (marginBottom != null)
+            wrapper.AddCssClass($"mb-{marginBottom.GetDescription()}");
 
         // Combine elements
-        var writer = new StringWriter();
-        label.WriteTo(writer, HtmlEncoder.Default);
-        input.WriteTo(writer, HtmlEncoder.Default);
-        validationMessage.WriteTo(writer, HtmlEncoder.Default);
+        wrapper.InnerHtml.AppendHtml(label);
+        wrapper.InnerHtml.AppendHtml(input);
+        wrapper.InnerHtml.AppendHtml(validationMessage);
 
-        return new HtmlString(writer.ToString());
+        return wrapper;
     }
 }
