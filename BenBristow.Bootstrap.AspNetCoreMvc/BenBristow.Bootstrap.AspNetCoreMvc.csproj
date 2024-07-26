@@ -14,15 +14,18 @@
         <PackageProjectUrl>https://github.com/benbristow/Bootstrap.AspNetCoreMvc</PackageProjectUrl>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <LangVersion>default</LangVersion>
-        <Version>0.0.7</Version>
+        <Version>0.0.8</Version>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="BenBristow.Extensions" Version="1.0.6" />
-        <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" Condition="'$(TargetFramework)' == 'net8.0'" />
+        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="..\README.md" Pack="true" PackagePath="\" />
+        <PackageReference Include="BenBristow.Extensions" Version="1.0.6"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="..\README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
 </Project>

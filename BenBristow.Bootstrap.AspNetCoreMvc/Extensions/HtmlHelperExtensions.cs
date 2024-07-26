@@ -5,24 +5,23 @@ using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.AspNetCore.Mvc.ViewFeatures.Internal;
 using Microsoft.AspNetCore.Routing;
 
 namespace BenBristow.Bootstrap.AspNetCoreMvc.Extensions;
 
 /// <summary>
-/// Provides a set of methods for generating HTML elements with Bootstrap styling.
+///     Provides a set of methods for generating HTML elements with Bootstrap styling.
 /// </summary>
 public static class HtmlHelperExtensions
 {
     /// <summary>
-    /// Generates a Bootstrap-styled alert element with the specified message, variant, and dismissible option.
+    ///     Generates a Bootstrap-styled alert element with the specified message, variant, and dismissible option.
     /// </summary>
-    /// <param name="htmlHelper">The <see cref="IHtmlHelper"/> instance this method extends.</param>
+    /// <param name="htmlHelper">The <see cref="IHtmlHelper" /> instance this method extends.</param>
     /// <param name="message">The message to display in the alert.</param>
     /// <param name="variant">The Bootstrap variant of the alert. Defaults to Variant.Primary.</param>
     /// <param name="dismissible">Specifies whether the alert is dismissible. Defaults to false.</param>
-    /// <returns>An <see cref="IHtmlContent"/> that represents the rendered alert element.</returns>
+    /// <returns>An <see cref="IHtmlContent" /> that represents the rendered alert element.</returns>
     public static IHtmlContent BootstrapAlert(
         this IHtmlHelper htmlHelper,
         string message,
@@ -52,16 +51,16 @@ public static class HtmlHelperExtensions
     }
 
     /// <summary>
-    /// Generates a Bootstrap-styled button element with the specified text, variant, and attributes.
+    ///     Generates a Bootstrap-styled button element with the specified text, variant, and attributes.
     /// </summary>
-    /// <param name="htmlHelper">The <see cref="IHtmlHelper"/> instance this method extends.</param>
+    /// <param name="htmlHelper">The <see cref="IHtmlHelper" /> instance this method extends.</param>
     /// <param name="text">The text to display on the button.</param>
     /// <param name="variant">The Bootstrap variant of the button. Defaults to Variant.Primary.</param>
     /// <param name="type">The type of the button. Defaults to "button".</param>
     /// <param name="href">The URL the button links to. Optional.</param>
     /// <param name="size">The Bootstrap size of the button. Defaults to Size.Default.</param>
     /// <param name="attributes">An object that contains the HTML attributes to set for the element. Optional.</param>
-    /// <returns>An <see cref="IHtmlContent"/> that represents the rendered button element.</returns>
+    /// <returns>An <see cref="IHtmlContent" /> that represents the rendered button element.</returns>
     public static IHtmlContent BootstrapButton(
         this IHtmlHelper htmlHelper,
         string text,
@@ -80,17 +79,13 @@ public static class HtmlHelperExtensions
         var tagBuilder = new TagBuilder(tag);
         var mergedAttributes = new RouteValueDictionary(attributes)
         {
-            ["class"] = baseClass
+            ["class"] = baseClass,
         };
 
         if (string.IsNullOrEmpty(href))
-        {
             mergedAttributes["type"] = type;
-        }
         else
-        {
             mergedAttributes["href"] = href;
-        }
 
         tagBuilder.MergeAttributes(mergedAttributes);
         tagBuilder.InnerHtml.Append(text);
@@ -99,7 +94,7 @@ public static class HtmlHelperExtensions
     }
 
     /// <summary>
-    /// Creates a Bootstrap styled form input with label and validation message.
+    ///     Creates a Bootstrap styled form input with label and validation message.
     /// </summary>
     /// <typeparam name="TModel">The type of the model.</typeparam>
     /// <typeparam name="TValue">The type of the value.</typeparam>
@@ -120,8 +115,9 @@ public static class HtmlHelperExtensions
         Margin? marginBottom = null,
         object? attributes = null)
     {
-        var modelExplorer = ExpressionMetadataProvider.FromLambdaExpression(expression, htmlHelper.ViewData, htmlHelper.MetadataProvider);
-        var isRequired = modelExplorer.Metadata.IsRequired;
+        var modelExpressionProvider = new ModelExpressionProvider(htmlHelper.MetadataProvider);
+        var modelExpression = modelExpressionProvider.CreateModelExpression(htmlHelper.ViewData, expression);
+        var metadata = modelExpression.Metadata;
 
         // Prepare attributes
         var inputClass = "form-control";
@@ -129,7 +125,7 @@ public static class HtmlHelperExtensions
             inputClass += $" form-control-{size.GetDescription()}";
 
         // Add validation class if necessary
-        var fullHtmlFieldName = htmlHelper.ViewContext.ViewData.TemplateInfo.GetFullHtmlFieldName(ExpressionHelper.GetExpressionText(expression));
+        var fullHtmlFieldName = htmlHelper.ViewContext.ViewData.TemplateInfo.GetFullHtmlFieldName(modelExpression.Name);
         if (htmlHelper.ViewData.ModelState.TryGetValue(fullHtmlFieldName, out var modelState))
         {
             var validationClass = GetValidationClass(modelState);
@@ -142,10 +138,10 @@ public static class HtmlHelperExtensions
             new
             {
                 placeholder,
-                @class = inputClass
+                @class = inputClass,
             });
 
-        if (isRequired)
+        if (metadata.IsRequired)
             defaultAttributes["required"] = "required";
 
         if (attributes != null)
@@ -180,9 +176,7 @@ public static class HtmlHelperExtensions
     private static string GetValidationClass(ModelStateEntry modelState)
     {
         if (modelState.Errors.Any())
-        {
             return "is-invalid";
-        }
 
         return modelState.AttemptedValue != null ? "is-valid" : string.Empty;
     }
