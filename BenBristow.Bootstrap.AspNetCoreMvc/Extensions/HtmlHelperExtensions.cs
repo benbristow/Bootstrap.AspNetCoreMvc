@@ -1,8 +1,8 @@
 using System.Linq.Expressions;
-using System.Text.Encodings.Web;
 using BenBristow.Bootstrap.AspNetCoreMvc.Enums;
 using BenBristow.Extensions;
 using Microsoft.AspNetCore.Html;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Routing;
@@ -127,6 +127,16 @@ public static class HtmlHelperExtensions
         if (size != Size.Default)
             inputClass += $" form-control-{size.GetDescription()}";
 
+        // Add validation class if necessary
+        var fieldName = htmlHelper.NameFor(expression);
+        if (htmlHelper.ViewData.ModelState.TryGetValue(fieldName, out var modelState))
+        {
+            var validationClass = GetValidationClass(modelState);
+            if (!string.IsNullOrEmpty(validationClass))
+                inputClass += " " + validationClass;
+        }
+
+        // Build attributes
         var defaultAttributes = new RouteValueDictionary(
             new
             {
@@ -164,5 +174,15 @@ public static class HtmlHelperExtensions
         wrapper.InnerHtml.AppendHtml(validationMessage);
 
         return wrapper;
+    }
+
+    private static string GetValidationClass(ModelStateEntry modelState)
+    {
+        if (modelState.Errors.Any())
+        {
+            return "is-invalid";
+        }
+
+        return modelState.AttemptedValue != null ? "is-valid" : string.Empty;
     }
 }
