@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Mvc.ViewFeatures.Internal;
 using Microsoft.AspNetCore.Routing;
 
 namespace BenBristow.Bootstrap.AspNetCoreMvc.Extensions;
@@ -119,7 +120,7 @@ public static class HtmlHelperExtensions
         Margin? marginBottom = null,
         object? attributes = null)
     {
-        var modelExplorer = htmlHelper.ViewData.ModelExplorer.GetExplorerForProperty(htmlHelper.NameFor(expression));
+        var modelExplorer = ExpressionMetadataProvider.FromLambdaExpression(expression, htmlHelper.ViewData, htmlHelper.MetadataProvider);
         var isRequired = modelExplorer.Metadata.IsRequired;
 
         // Prepare attributes
@@ -128,8 +129,8 @@ public static class HtmlHelperExtensions
             inputClass += $" form-control-{size.GetDescription()}";
 
         // Add validation class if necessary
-        var fieldName = htmlHelper.NameFor(expression);
-        if (htmlHelper.ViewData.ModelState.TryGetValue(fieldName, out var modelState))
+        var fullHtmlFieldName = htmlHelper.ViewContext.ViewData.TemplateInfo.GetFullHtmlFieldName(ExpressionHelper.GetExpressionText(expression));
+        if (htmlHelper.ViewData.ModelState.TryGetValue(fullHtmlFieldName, out var modelState))
         {
             var validationClass = GetValidationClass(modelState);
             if (!string.IsNullOrEmpty(validationClass))
@@ -157,7 +158,7 @@ public static class HtmlHelperExtensions
         // Create input
         var input = inputType.Equals("textarea", StringComparison.OrdinalIgnoreCase)
             ? htmlHelper.TextAreaFor(expression, defaultAttributes)
-            : htmlHelper.TextBoxFor(expression, defaultAttributes);
+            : htmlHelper.TextBoxFor(expression, inputType, defaultAttributes);
 
         // Create label and validation message
         var label = htmlHelper.LabelFor(expression, new { @class = "form-label" });
