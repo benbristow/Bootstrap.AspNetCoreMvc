@@ -51,6 +51,87 @@ public static class HtmlHelperExtensions
     }
 
     /// <summary>
+    ///     Generates a Bootstrap styled pagination component.
+    /// </summary>
+    /// <param name="htmlHelper">The IHtmlHelper instance this method extends.</param>
+    /// <param name="currentPage">The current active page number.</param>
+    /// <param name="totalPages">The total number of pages.</param>
+    /// <param name="pageUrl">A function that generates the URL for each page number.</param>
+    /// <param name="maxVisiblePages">The maximum number of page numbers to display. Defaults to 5.</param>
+    /// <param name="showFirstLast">Determines whether to show "First" and "Last" buttons. Defaults to true.</param>
+    /// <param name="firstText">The text for the "First" button. Defaults to "«".</param>
+    /// <param name="lastText">The text for the "Last" button. Defaults to "»".</param>
+    /// <param name="previousText">The text for the "Previous" button. Defaults to "‹".</param>
+    /// <param name="nextText">The text for the "Next" button. Defaults to "›".</param>
+    /// <param name="size">The size of the pagination component. Defaults to Size.Default.</param>
+    /// <returns>An IHtmlContent representing the rendered pagination component.</returns>
+    /// <remarks>
+    ///     This method creates a responsive pagination component that adjusts based on the current page and total pages.
+    ///     It includes "Previous" and "Next" buttons, as well as optional "First" and "Last" buttons.
+    ///     The pagination adapts to show a sensible range of page numbers around the current page.
+    /// </remarks>
+    /// <example>
+    ///     Usage in a Razor view:
+    ///     <code>
+    /// @Html.BootstrapPagination(
+    ///     currentPage: Model.CurrentPage,
+    ///     totalPages: Model.TotalPages,
+    ///     pageUrl: pageNumber => Url.Action("Index", new { page = pageNumber }),
+    ///     maxVisiblePages: 7,
+    ///     size: Size.Small
+    /// )
+    /// </code>
+    /// </example>
+    public static IHtmlContent BootstrapPagination(
+        this IHtmlHelper htmlHelper,
+        int currentPage,
+        int totalPages,
+        Func<int, string> pageUrl,
+        int maxVisiblePages = 5,
+        bool showFirstLast = true,
+        string firstText = "«",
+        string lastText = "»",
+        string previousText = "‹",
+        string nextText = "›",
+        Size size = Size.Default)
+    {
+        if (totalPages <= 1)
+            return HtmlString.Empty;
+
+        var ulTag = new TagBuilder("ul");
+        ulTag.AddCssClass("pagination");
+
+        if (size != Size.Default)
+            ulTag.AddCssClass($"pagination-{size.GetDescription()}");
+
+        // Add First and Previous buttons
+        if (showFirstLast)
+            ulTag.InnerHtml.AppendHtml(CreatePaginationItem(1, firstText, currentPage > 1, pageUrl));
+        ulTag.InnerHtml.AppendHtml(CreatePaginationItem(currentPage - 1, previousText, currentPage > 1, pageUrl));
+
+        // Calculate visible page range
+        var startPage = Math.Max(1, currentPage - maxVisiblePages / 2);
+        var endPage = Math.Min(totalPages, startPage + maxVisiblePages - 1);
+
+        if (endPage - startPage + 1 < maxVisiblePages)
+            startPage = Math.Max(1, endPage - maxVisiblePages + 1);
+
+        // Add numbered page buttons
+        for (var i = startPage; i <= endPage; i++)
+            ulTag.InnerHtml.AppendHtml(CreatePaginationItem(i, i.ToString(), true, pageUrl, i == currentPage));
+
+        // Add Next and Last buttons
+        ulTag.InnerHtml.AppendHtml(CreatePaginationItem(currentPage + 1, nextText, currentPage < totalPages, pageUrl));
+        if (showFirstLast)
+            ulTag.InnerHtml.AppendHtml(CreatePaginationItem(totalPages, lastText, currentPage < totalPages, pageUrl));
+
+        var navTag = new TagBuilder("nav");
+        navTag.InnerHtml.AppendHtml(ulTag);
+
+        return navTag;
+    }
+
+    /// <summary>
     ///     Generates a Bootstrap-styled button element with the specified text, variant, and attributes.
     /// </summary>
     /// <param name="htmlHelper">The <see cref="IHtmlHelper" /> instance this method extends.</param>
@@ -171,6 +252,24 @@ public static class HtmlHelperExtensions
         wrapper.InnerHtml.AppendHtml(validationMessage);
 
         return wrapper;
+    }
+
+    private static TagBuilder CreatePaginationItem(int pageNumber, string text, bool enabled, Func<int, string> pageUrl, bool active = false)
+    {
+        var liTag = new TagBuilder("li");
+        liTag.AddCssClass("page-item");
+        if (!enabled)
+            liTag.AddCssClass("disabled");
+        if (active)
+            liTag.AddCssClass("active");
+
+        var aTag = new TagBuilder("a");
+        aTag.AddCssClass("page-link");
+        aTag.Attributes["href"] = enabled ? pageUrl(pageNumber) : "#";
+        aTag.InnerHtml.Append(text);
+
+        liTag.InnerHtml.AppendHtml(aTag);
+        return liTag;
     }
 
     private static string GetValidationClass(ModelStateEntry modelState)
