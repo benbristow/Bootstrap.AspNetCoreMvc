@@ -270,6 +270,34 @@ public static class HtmlHelperExtensions
         return wrapper;
     }
 
+    /// <summary>
+    /// Adds Bootstrap CSS CDN link from jsDelivr to the HTML.
+    /// </summary>
+    /// <param name="htmlHelper">The HTML helper instance.</param>
+    /// <returns>An IHtmlContent object representing the Bootstrap CSS link tag.</returns>
+    public static IHtmlContent AddBootstrapCdnStyles(this IHtmlHelper htmlHelper)
+    {
+        var tag = new TagBuilder("link");
+        tag.Attributes["rel"] = "stylesheet";
+        tag.Attributes["href"] = "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css";
+        tag.Attributes["integrity"] = "sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH";
+        tag.Attributes["crossorigin"] = "anonymous";
+        return tag;
+    }
+
+    /// <summary>
+    /// Adds Bootstrap JavaScript CDN script from jsDelivr to the HTML.
+    /// </summary>
+    /// <param name="htmlHelper">The HTML helper instance.</param>
+    /// <returns>An IHtmlContent object representing the Bootstrap JavaScript script tag.</returns>
+    public static IHtmlContent AddBootstrapCdnScripts(this IHtmlHelper htmlHelper)
+    {
+        var tag = new TagBuilder("script");
+        tag.Attributes["src"] = "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js";
+        tag.Attributes["integrity"] = "sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz";
+        tag.Attributes["crossorigin"] = "anonymous";
+        return tag;
+    }
     private static TagBuilder CreatePaginationItem(int pageNumber, string text, bool enabled, Func<int, string> pageUrl, bool active = false)
     {
         var liTag = new TagBuilder("li");
