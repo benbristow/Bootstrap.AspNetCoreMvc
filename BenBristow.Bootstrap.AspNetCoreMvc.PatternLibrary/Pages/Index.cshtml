@@ -19,7 +19,7 @@
 
 <h4>Primary</h4>
 <p>
-    @Html.BootstrapButton("Primary", size: Size.Large)
+    @Html.BootstrapButton("Primary", size: Size.Large, variant: Variant.Primary)
 </p>
 
 <h4>Small button</h4>
@@ -29,7 +29,12 @@
 
 <h4>Link button</h4>
 <p>
-    @Html.BootstrapButton("Link button", href: "https://www.google.com")
+    @Html.BootstrapButton("Link button", href: "https://www.google.com", variant: Variant.Primary)
+</p>
+
+<h4>Outline button</h4>
+<p>
+    @Html.BootstrapButton("Outline", outlineVariant: Variant.Primary)
 </p>
 
 <hr/>

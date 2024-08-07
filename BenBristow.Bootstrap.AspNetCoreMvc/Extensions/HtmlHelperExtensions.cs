@@ -137,7 +137,8 @@ public static class HtmlHelperExtensions
     /// </summary>
     /// <param name="htmlHelper">The <see cref="IHtmlHelper" /> instance this method extends.</param>
     /// <param name="text">The text to display on the button.</param>
-    /// <param name="variant">The Bootstrap variant of the button. Defaults to Variant.Primary.</param>
+    /// <param name="variant">The Bootstrap variant of the button.</param>
+    /// <param name="outlineVariant">The Bootstrap outline variant of the button.</param>
     /// <param name="type">The type of the button. Defaults to "button".</param>
     /// <param name="href">The URL the button links to. Optional.</param>
     /// <param name="size">The Bootstrap size of the button. Defaults to Size.Default.</param>
@@ -146,7 +147,8 @@ public static class HtmlHelperExtensions
     public static IHtmlContent BootstrapButton(
         this IHtmlHelper htmlHelper,
         string text,
-        Variant variant = Variant.Primary,
+        Variant? variant = null,
+        Variant? outlineVariant = null,
         string type = "button",
         string? href = null,
         Size size = Size.Default,
@@ -154,7 +156,15 @@ public static class HtmlHelperExtensions
     {
         var tag = string.IsNullOrEmpty(href) ? "button" : "a";
 
-        var baseClass = $"btn btn-{variant.GetDescription()}";
+        var baseClass = "btn";
+
+        if (variant != null)
+            baseClass += $" btn-{variant.GetDescription()}";
+        else if (outlineVariant != null)
+            baseClass += $" btn-outline-{outlineVariant.GetDescription()}";
+        else
+            baseClass += $" btn-${Variant.Primary.GetDescription()}";
+
         if (size != Size.Default)
             baseClass += $" btn-{size.GetDescription()}";
 
