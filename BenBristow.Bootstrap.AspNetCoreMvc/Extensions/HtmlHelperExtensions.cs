@@ -218,14 +218,16 @@ public static class HtmlHelperExtensions
         }
 
         // Build attributes
+        if (metadata.ValidatorMetadata.Any(v => v is EmailAddressAttribute))
+            inputType = "email";
         var defaultAttributes = new RouteValueDictionary(
             new
             {
                 placeholder,
                 @class = inputClass,
             });
-        if (metadata.ValidatorMetadata.Any(v => v is EmailAddressAttribute))
-            defaultAttributes["type"] = "email";
+        if (inputType != "textarea")
+            defaultAttributes["type"] = inputType;
         if (metadata.IsRequired)
             defaultAttributes["required"] = "required";
         if (metadata.IsReadOnly)

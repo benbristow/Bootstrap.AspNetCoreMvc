@@ -7,19 +7,23 @@ namespace BenBristow.Bootstrap.AspNetCoreMvc.PatternLibrary.Pages;
 public class IndexModel : PageModel
 {
     [BindProperty]
-    public string Name { get; init; }
+    public string? Name { get; init; }
 
     [BindProperty]
     [Required(ErrorMessage = "Please select a favourite color")]
     [Display(Name = "Favourite color")]
-    public string FavouriteColor { get; init; }
+    public string? FavouriteColor { get; init; }
 
     [BindProperty]
     [EmailAddress]
-    public string Email { get; init; }
+    public string? Email { get; init; }
 
     [BindProperty]
-    public string Description { get; init; }
+    public string? Description { get; init; }
+
+    [BindProperty]
+    [Display(Name = "Date of birth")]
+    public DateTimeOffset? DateOfBirth { get; set; }
 
     public IActionResult OnPost()
     {

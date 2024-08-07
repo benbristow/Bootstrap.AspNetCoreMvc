@@ -17,14 +17,14 @@
 
 <h2>Buttons</h2>
 
-<h4>Default</h4>
-<p>
-    @Html.BootstrapButton("Default")
-</p>
-
 <h4>Primary</h4>
 <p>
-    @Html.BootstrapButton("Primary")
+    @Html.BootstrapButton("Primary", size: Size.Large)
+</p>
+
+<h4>Small button</h4>
+<p>
+    @Html.BootstrapButton("Small", size: Size.Small, variant: Variant.Secondary)
 </p>
 
 <h4>Link button</h4>
@@ -45,6 +45,11 @@
     <div>
         <h4>Text input (required)</h4>
         @Html.BootstrapInputFor(m => m.FavouriteColor, placeholder: "Favourite color")
+    </div>
+
+    <div>
+        <h4>Date input</h4>
+        @Html.BootstrapInputFor(m => m.DateOfBirth, placeholder: "Enter date of birth", inputType: "datetime-local")
     </div>
 
     <div>
