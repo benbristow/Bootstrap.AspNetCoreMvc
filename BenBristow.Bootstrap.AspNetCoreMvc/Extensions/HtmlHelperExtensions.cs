@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using BenBristow.Bootstrap.AspNetCoreMvc.Enums;
 using BenBristow.Extensions;
@@ -221,9 +222,12 @@ public static class HtmlHelperExtensions
                 placeholder,
                 @class = inputClass,
             });
-
+        if (metadata.ValidatorMetadata.Any(v => v is EmailAddressAttribute))
+            defaultAttributes["type"] = "email";
         if (metadata.IsRequired)
             defaultAttributes["required"] = "required";
+        if (metadata.IsReadOnly)
+            defaultAttributes["readonly"] = "readonly";
 
         if (attributes != null)
         {
@@ -235,7 +239,7 @@ public static class HtmlHelperExtensions
         // Create input
         var input = inputType.Equals("textarea", StringComparison.OrdinalIgnoreCase)
             ? htmlHelper.TextAreaFor(expression, defaultAttributes)
-            : htmlHelper.TextBoxFor(expression, inputType, defaultAttributes);
+            : htmlHelper.TextBoxFor(expression, defaultAttributes);
 
         // Create label and validation message
         var label = htmlHelper.LabelFor(expression, new { @class = "form-label" });

@@ -1,0 +1,72 @@
+﻿@page
+@using BenBristow.Bootstrap.AspNetCoreMvc.Enums
+@using BenBristow.Bootstrap.AspNetCoreMvc.Extensions
+@model IndexModel
+
+<h1>Pattern Library</h1>
+
+<h2>Alerts</h2>
+
+<h4>Static</h4>
+@Html.BootstrapAlert("This is a Bootstrap alert", Variant.Danger)
+
+<h4>Dismissible</h4>
+@Html.BootstrapAlert("This is a Bootstrap alert", Variant.Warning, true)
+
+<hr/>
+
+<h2>Buttons</h2>
+
+<h4>Default</h4>
+<p>
+    @Html.BootstrapButton("Default")
+</p>
+
+<h4>Primary</h4>
+<p>
+    @Html.BootstrapButton("Primary")
+</p>
+
+<h4>Link button</h4>
+<p>
+    @Html.BootstrapButton("Link button", href: "https://www.google.com")
+</p>
+
+<hr/>
+
+<h2>Inputs</h2>
+
+<form method="post" class="vstack gap-3">
+    <div>
+        <h4>Text input</h4>
+        @Html.BootstrapInputFor(m => m.Name, placeholder: "Enter name", size: Size.Large)
+    </div>
+
+    <div>
+        <h4>Text input (required)</h4>
+        @Html.BootstrapInputFor(m => m.FavouriteColor, placeholder: "Favourite color")
+    </div>
+
+    <div>
+        <h4>Email input</h4>
+        @Html.BootstrapInputFor(m => m.Email, placeholder: "Enter email")
+    </div>
+
+    <div>
+        <h4>Text area</h4>
+        @Html.BootstrapInputFor(m => m.Description, "textarea", "Enter description", attributes: new { rows = 5 })
+    </div>
+
+    @Html.BootstrapButton("Submit", type: "submit")
+</form>
+
+<hr/>
+
+<h2>Pagination</h2>
+
+@Html.BootstrapPagination(
+    currentPage: int.TryParse(Request.Query["page"], out var page) ? page : 5,
+    totalPages: 20,
+    pageUrl: pageNumber => $"?page={pageNumber}",
+    maxVisiblePages: 7,
+    size: Size.Small)
