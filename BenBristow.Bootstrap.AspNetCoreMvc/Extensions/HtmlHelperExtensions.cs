@@ -187,6 +187,7 @@ public static class HtmlHelperExtensions
     /// <param name="size">The size of the input. Defaults to Size.Default.</param>
     /// <param name="marginBottom">The bottom margin for the input group. Nullable.</param>
     /// <param name="attributes">Additional HTML attributes to apply to the input element.</param>
+    /// <param name="addRequiredAsterisk">Whether to add an asterisk to the label if the field is required. Defaults to true.</param>
     /// <returns>An IHtmlContent containing the input group.</returns>
     public static IHtmlContent BootstrapInputFor<TModel, TValue>(
         this IHtmlHelper<TModel> htmlHelper,
@@ -195,7 +196,8 @@ public static class HtmlHelperExtensions
         string placeholder = "",
         Size size = Size.Default,
         Margin? marginBottom = null,
-        object? attributes = null)
+        object? attributes = null,
+        bool addRequiredAsterisk = true)
     {
         var modelExpressionProvider = new ModelExpressionProvider(htmlHelper.MetadataProvider);
         var modelExpression = modelExpressionProvider.CreateModelExpression(htmlHelper.ViewData, expression);
@@ -242,7 +244,15 @@ public static class HtmlHelperExtensions
             : htmlHelper.TextBoxFor(expression, defaultAttributes);
 
         // Create label and validation message
-        var label = htmlHelper.LabelFor(expression, new { @class = "form-label" });
+        var labelText = metadata.GetDisplayName();
+        if (metadata.IsRequired && addRequiredAsterisk)
+            labelText += " <span class=\"text-danger\">(*)</span>";
+
+        var label = new TagBuilder("label");
+        label.Attributes["for"] = htmlHelper.IdFor(expression);
+        label.AddCssClass("form-label");
+        label.InnerHtml.AppendHtml(labelText);
+
         var validationMessage = htmlHelper.ValidationMessageFor(expression, string.Empty, new { @class = "invalid-feedback" });
 
         // Create wrapper div using TagBuilder
