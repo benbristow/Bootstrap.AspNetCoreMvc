@@ -3,80 +3,100 @@
 @using BenBristow.Bootstrap.AspNetCoreMvc.Extensions
 @model IndexModel
 
-<h1>Pattern Library</h1>
+<div class="container mt-4">
+    <h1 class="mb-4">Pattern Library</h1>
 
-<h2>Alerts</h2>
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">Alerts</h2>
+                    <h4 class="mt-3">Static</h4>
+                    @Html.BootstrapAlert("This is a Bootstrap alert", Variant.Danger)
 
-<h4>Static</h4>
-@Html.BootstrapAlert("This is a Bootstrap alert", Variant.Danger)
+                    <h4 class="mt-3">Dismissible</h4>
+                    @Html.BootstrapAlert("This is a Bootstrap alert", Variant.Warning, true)
+                </div>
+            </div>
+        </div>
 
-<h4>Dismissible</h4>
-@Html.BootstrapAlert("This is a Bootstrap alert", Variant.Warning, true)
-
-<hr/>
-
-<h2>Buttons</h2>
-
-<h4>Primary</h4>
-<p>
-    @Html.BootstrapButton("Primary", size: Size.Large, variant: Variant.Primary)
-</p>
-
-<h4>Small button</h4>
-<p>
-    @Html.BootstrapButton("Small", size: Size.Small, variant: Variant.Secondary)
-</p>
-
-<h4>Link button</h4>
-<p>
-    @Html.BootstrapButton("Link button", href: "https://www.google.com", variant: Variant.Primary)
-</p>
-
-<h4>Outline button</h4>
-<p>
-    @Html.BootstrapButton("Outline", outlineVariant: Variant.Primary)
-</p>
-
-<hr/>
-
-<h2>Inputs</h2>
-
-<form method="post" class="vstack gap-3">
-    <div>
-        <h4>Text input</h4>
-        @Html.BootstrapInputFor(m => m.Name, placeholder: "Enter name", size: Size.Large)
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">Breadcrumb</h2>
+                    @Html.BootstrapBreadcrumb(
+                        ("Home", "#"),
+                        ("Products", "/#products"),
+                        ("Laptops", "/#products-laptops"))
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div>
-        <h4>Text input (required)</h4>
-        @Html.BootstrapInputFor(m => m.FavouriteColor, placeholder: "Favourite color")
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="card-title">Buttons</h2>
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <h4>Primary</h4>
+                    @Html.BootstrapButton("Primary", size: Size.Large, variant: Variant.Primary)
+                </div>
+                <div class="col-md-3 mb-3">
+                    <h4>Small button</h4>
+                    @Html.BootstrapButton("Small", size: Size.Small, variant: Variant.Secondary)
+                </div>
+                <div class="col-md-3 mb-3">
+                    <h4>Link button</h4>
+                    @Html.BootstrapButton("Link button", href: "https://www.google.com", variant: Variant.Primary)
+                </div>
+                <div class="col-md-3 mb-3">
+                    <h4>Outline button</h4>
+                    @Html.BootstrapButton("Outline", outlineVariant: Variant.Primary)
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div>
-        <h4>Date input</h4>
-        @Html.BootstrapInputFor(m => m.DateOfBirth, placeholder: "Enter date of birth", inputType: "datetime-local")
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="card-title">Inputs</h2>
+            <form method="post" class="row g-3">
+                <div class="col-md-6">
+                    <h4>Text input</h4>
+                    @Html.BootstrapInputFor(m => m.Name, placeholder: "Enter name", size: Size.Large)
+                </div>
+                <div class="col-md-6">
+                    <h4>Text input (required)</h4>
+                    @Html.BootstrapInputFor(m => m.FavouriteColor, placeholder: "Favourite color")
+                </div>
+                <div class="col-md-6">
+                    <h4>Date input</h4>
+                    @Html.BootstrapInputFor(m => m.DateOfBirth, placeholder: "Enter date of birth", inputType: "datetime-local")
+                </div>
+                <div class="col-md-6">
+                    <h4>Email input</h4>
+                    @Html.BootstrapInputFor(m => m.Email, placeholder: "Enter email")
+                </div>
+                <div class="col-12">
+                    <h4>Text area</h4>
+                    @Html.BootstrapInputFor(m => m.Description, "textarea", "Enter description", attributes: new { rows = 5 })
+                </div>
+                <div class="col-12">
+                    @Html.BootstrapButton("Submit", type: "submit", variant: Variant.Primary)
+                </div>
+            </form>
+        </div>
     </div>
 
-    <div>
-        <h4>Email input</h4>
-        @Html.BootstrapInputFor(m => m.Email, placeholder: "Enter email")
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="card-title">Pagination</h2>
+            @Html.BootstrapPagination(
+                currentPage: int.TryParse(Request.Query["page"], out var page) ? page : 5,
+                totalPages: 20,
+                pageUrl: pageNumber => $"?page={pageNumber}",
+                maxVisiblePages: 7,
+                size: Size.Small)
+        </div>
     </div>
-
-    <div>
-        <h4>Text area</h4>
-        @Html.BootstrapInputFor(m => m.Description, "textarea", "Enter description", attributes: new { rows = 5 })
-    </div>
-
-    @Html.BootstrapButton("Submit", type: "submit")
-</form>
-
-<hr/>
-
-<h2>Pagination</h2>
-
-@Html.BootstrapPagination(
-    currentPage: int.TryParse(Request.Query["page"], out var page) ? page : 5,
-    totalPages: 20,
-    pageUrl: pageNumber => $"?page={pageNumber}",
-    maxVisiblePages: 7,
-    size: Size.Small)
+</div>

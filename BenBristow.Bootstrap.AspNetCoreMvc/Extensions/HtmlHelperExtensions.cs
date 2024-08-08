@@ -52,6 +52,65 @@ public static class HtmlHelperExtensions
     }
 
     /// <summary>
+    /// Generates a Bootstrap 5 breadcrumb component as an HTML string.
+    /// </summary>
+    /// <param name="htmlHelper">The IHtmlHelper instance this method extends.</param>
+    /// <param name="items">An array of tuples representing the breadcrumb items.
+    /// Each tuple should contain the text to display and the URL for the breadcrumb item.</param>
+    /// <returns>An IHtmlContent object representing the generated breadcrumb HTML.</returns>
+    /// <remarks>
+    /// This method creates a fully structured Bootstrap 5 breadcrumbs component.
+    /// The last item in the breadcrumb will be marked as active and will not be a clickable link.
+    /// </remarks>
+    /// <example>
+    /// Usage in Razor view:
+    /// @Html.BootstrapBreadcrumb(
+    ///     ("Home", "/"),
+    ///     ("Products", "/products"),
+    ///     ("Laptops", "/products/laptops"))
+    /// </example>
+    public static IHtmlContent BootstrapBreadcrumb(this IHtmlHelper htmlHelper, params (string Text, string Url)[] items)
+    {
+        if (items.Length == 0)
+            return HtmlString.Empty;
+
+        var nav = new TagBuilder("nav");
+        nav.Attributes.Add("aria-label", "breadcrumb");
+
+        var ol = new TagBuilder("ol");
+        ol.AddCssClass("breadcrumb");
+
+        for (var i = 0; i < items.Length; i++)
+        {
+            var (text, url) = items[i];
+            var isLast = i == items.Length - 1;
+
+            var li = new TagBuilder("li");
+            li.AddCssClass("breadcrumb-item");
+
+            if (isLast)
+            {
+                li.AddCssClass("active");
+                li.Attributes.Add("aria-current", "page");
+                li.InnerHtml.Append(text);
+            }
+            else
+            {
+                var a = new TagBuilder("a");
+                a.Attributes.Add("href", url);
+                a.InnerHtml.Append(text);
+                li.InnerHtml.AppendHtml(a);
+            }
+
+            ol.InnerHtml.AppendHtml(li);
+        }
+
+        nav.InnerHtml.AppendHtml(ol);
+
+        return nav;
+    }
+
+    /// <summary>
     ///     Generates a Bootstrap styled pagination component.
     /// </summary>
     /// <param name="htmlHelper">The IHtmlHelper instance this method extends.</param>
