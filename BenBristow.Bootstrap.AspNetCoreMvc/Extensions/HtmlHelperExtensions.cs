@@ -56,7 +56,8 @@ public static class HtmlHelperExtensions
     /// </summary>
     /// <param name="htmlHelper">The IHtmlHelper instance this method extends.</param>
     /// <param name="items">An array of tuples representing the breadcrumb items.
-    /// Each tuple should contain the text to display and the URL for the breadcrumb item.</param>
+    /// Each tuple should contain the text to display and the URL for the breadcrumb item.
+    /// If the URL is null or empty, the breadcrumb item will not be a clickable link.</param>
     /// <returns>An IHtmlContent object representing the generated breadcrumb HTML.</returns>
     /// <remarks>
     /// This method creates a fully structured Bootstrap 5 breadcrumbs component.
@@ -67,9 +68,10 @@ public static class HtmlHelperExtensions
     /// @Html.BootstrapBreadcrumb(
     ///     ("Home", "/"),
     ///     ("Products", "/products"),
-    ///     ("Laptops", "/products/laptops"))
+    ///     ("Laptops", null),
+    ///     ("Details", "/products/laptops/details"))
     /// </example>
-    public static IHtmlContent BootstrapBreadcrumb(this IHtmlHelper htmlHelper, params (string Text, string Url)[] items)
+    public static IHtmlContent BootstrapBreadcrumb(this IHtmlHelper htmlHelper, params (string Text, string? Url)[] items)
     {
         if (items.Length == 0)
             return HtmlString.Empty;
@@ -88,7 +90,7 @@ public static class HtmlHelperExtensions
             var li = new TagBuilder("li");
             li.AddCssClass("breadcrumb-item");
 
-            if (isLast)
+            if (isLast || string.IsNullOrEmpty(url))
             {
                 li.AddCssClass("active");
                 li.Attributes.Add("aria-current", "page");
