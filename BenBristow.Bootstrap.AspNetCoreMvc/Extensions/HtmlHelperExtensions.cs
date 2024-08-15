@@ -228,10 +228,10 @@ public static class HtmlHelperExtensions
             baseClass += $" btn-{size.GetDescription()}";
 
         var tagBuilder = new TagBuilder(tag);
-        var mergedAttributes = new RouteValueDictionary(attributes)
-        {
-            ["class"] = baseClass,
-        };
+        var mergedAttributes = new RouteValueDictionary(attributes);
+
+        if (!mergedAttributes.TryAdd("class", baseClass))
+            mergedAttributes["class"] = $"{baseClass} {mergedAttributes["class"]}";
 
         if (string.IsNullOrEmpty(href))
             mergedAttributes["type"] = type;
