@@ -64,7 +64,7 @@
             <form method="post" class="row g-3">
                 <div class="col-md-6">
                     <h4>Text input</h4>
-                    @Html.BootstrapInputFor(m => m.Name, placeholder: "Enter name", size: Size.Large)
+                    @Html.BootstrapInputFor(m => m.Name, placeholder: "Enter name", size: Size.Large, attributes: new { @class = "example-of-a-custom-class" })
                 </div>
                 <div class="col-md-6">
                     <h4>Text input (required)</h4>

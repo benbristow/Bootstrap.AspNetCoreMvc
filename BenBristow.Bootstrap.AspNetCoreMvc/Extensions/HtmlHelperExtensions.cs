@@ -308,7 +308,12 @@ public static class HtmlHelperExtensions
         {
             var customAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(attributes);
             foreach (var attr in customAttributes)
-                defaultAttributes[attr.Key] = attr.Value;
+            {
+                if (attr.Key.Equals("class", StringComparison.OrdinalIgnoreCase))
+                    defaultAttributes["class"] = $"{defaultAttributes["class"]} {attr.Value}";
+                else
+                    defaultAttributes[attr.Key] = attr.Value;
+            }
         }
 
         // Create input
